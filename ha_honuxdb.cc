@@ -24,12 +24,6 @@
 /**
   @file ha_honuxdb.cc
 
-  @brief
-  The ha_honuxdb engine is a stubbed storage engine for example purposes only;
-  it does nothing at this point. Its purpose is to provide a source
-  code illustration of how to begin writing new storage engines; see also
-  /storage/honux/ha_honuxdb.h.
-
   @details
   ha_honuxdb will let you create/open/delete tables, but
   nothing further (for example, indexes are not supported nor can data
@@ -84,13 +78,6 @@
   the table in question was already opened; had it not been open, a call to
   ha_honuxdb::open() would also have been necessary. Calls to
   ha_honuxdb::extra() are hints as to what will be occurring to the request.
-
-  A Longer Example can be found called the "Skeleton Engine" which can be
-  found on TangentOrg. It has both an engine and a full build environment
-  for building a pluggable storage engine.
-
-  Happy coding!<br>
-    -Brian
 */
 
 #include "storage/honuxdb/ha_honuxdb.h"
@@ -184,18 +171,6 @@ static handler *honuxdb_create_handler(handlerton *hton, TABLE_SHARE *table,
 ha_honuxdb::ha_honuxdb(handlerton *hton, TABLE_SHARE *table_arg)
     : handler(hton, table_arg) {}
 
-/*
-  List of all system tables specific to the SE.
-  Array element would look like below,
-     { "<database_name>", "<system table name>" },
-  The last element MUST be,
-     { (const char*)NULL, (const char*)NULL }
-
-  This array is optional, so every SE need not implement it.
-*/
-static st_handler_tablename ha_honuxdb_system_tables[] = {
-    {(const char *)nullptr, (const char *)nullptr}};
-
 /**
   @brief Check if the given db.tablename is a system table for this SE.
 
@@ -210,19 +185,8 @@ static st_handler_tablename ha_honuxdb_system_tables[] = {
 static bool honuxdb_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table) {
-  st_handler_tablename *systab;
-
   // Does this SE support "ALL" SQL layer system tables ?
   if (is_sql_layer_system_table) return false;
-
-  // Check if this is SE layer system tables
-  systab = ha_honuxdb_system_tables;
-  while (systab && systab->db) {
-    if (systab->db == db && strcmp(systab->tablename, table_name) == 0)
-      return true;
-    systab++;
-  }
-
   return false;
 }
 
@@ -924,7 +888,7 @@ mysql_declare_plugin(honuxdb){
     honuxdb_init,                 /* plugin init */
     nullptr,                      /* plugin check uninstall */
     honuxdb_deinit,               /* plugin deinit */
-    0x0001                        /* plugin version (0.1) */,
+    0x0001,                       /* plugin version (0.1) */
     func_status,              /* status variables */
     honux_system_variables, /* system variables */
     nullptr,                  /* config options */

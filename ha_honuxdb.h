@@ -23,20 +23,11 @@
 
 /** @file ha_honuxdb.h
 
-    @brief
-  The ha_honuxdb engine is a stubbed storage engine for example purposes only;
-  it does nothing at this point. Its purpose is to provide a source
-  code illustration of how to begin writing new storage engines; see also
-  /storage/example/ha_honuxdb.cc.
-
     @note
   Please read ha_honuxdb.cc before reading this file.
   Reminder: The example storage engine implements all methods that are
   *required* to be implemented. For a full list of all methods that you can
   implement, see handler.h.
-
-   @see
-  /sql/handler.h and /storage/honuxdb/ha_honuxdb.cc
 */
 
 #include <sys/types.h>
@@ -179,9 +170,6 @@ class ha_honuxdb : public handler {
 
     Most of these methods are not obligatory, skip them and
     MySQL will treat them as not implemented
-  */
-  /** @brief
-    We implement this in ha_honuxdb.cc; it's a required method.
   */
   int open(const char *name, int mode, uint test_if_locked,
            const dd::Table *table_def) override;  // required
