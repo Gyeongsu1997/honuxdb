@@ -28,7 +28,7 @@
   The ha_honuxdb engine is a stubbed storage engine for example purposes only;
   it does nothing at this point. Its purpose is to provide a source
   code illustration of how to begin writing new storage engines; see also
-  /storage/example/ha_honuxdb.h.
+  /storage/honux/ha_honuxdb.h.
 
   @details
   ha_honuxdb will let you create/open/delete tables, but
@@ -108,7 +108,7 @@ static handler *honuxdb_create_handler(handlerton *hton, TABLE_SHARE *table,
 handlerton *honuxdb_hton;
 
 /* Interface to mysqld, to check system tables supported by SE */
-static bool example_is_supported_system_table(const char *db,
+static bool honux_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table);
 
@@ -128,12 +128,12 @@ static int honuxdb_init(void *p) {
   */
   honuxdb_hton->create = honuxdb_create_handler;
   honuxdb_hton->flags = HTON_CAN_RECREATE;
-  honuxdb_hton->is_supported_system_table = example_is_supported_system_table;
+  honuxdb_hton->is_supported_system_table = honux_is_supported_system_table;
 
   return 0;
 }
 
-static int example_deinit_func(void *p [[maybe_unused]]) {
+static int honux_deinit_func(void *p [[maybe_unused]]) {
   DBUG_TRACE;
 
   assert(p);
@@ -207,7 +207,7 @@ static st_handler_tablename ha_honuxdb_system_tables[] = {
   @retval true   Given db.table_name is supported system table.
   @retval false  Given db.table_name is not a supported system table.
 */
-static bool example_is_supported_system_table(const char *db,
+static bool honux_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table) {
   st_handler_tablename *systab;
@@ -788,7 +788,7 @@ int ha_honuxdb::create(const char *name, TABLE *, HA_CREATE_INFO *,
   return 0;
 }
 
-struct st_mysql_storage_engine example_storage_engine = {
+struct st_mysql_storage_engine honux_storage_engine = {
     MYSQL_HANDLERTON_INTERFACE_VERSION};
 
 static ulong srv_enum_var = 0;
@@ -848,7 +848,7 @@ static MYSQL_THDVAR_LONGLONG(signed_longlong_thdvar, PLUGIN_VAR_RQCMDARG,
                              "LLONG_MIN..LLONG_MAX", nullptr, nullptr, -10,
                              LLONG_MIN, LLONG_MAX, 0);
 
-static SYS_VAR *example_system_variables[] = {
+static SYS_VAR *honux_system_variables[] = {
     MYSQL_SYSVAR(enum_var),
     MYSQL_SYSVAR(ulong_var),
     MYSQL_SYSVAR(double_var),
@@ -864,7 +864,7 @@ static SYS_VAR *example_system_variables[] = {
     nullptr};
 
 // this is an example of SHOW_FUNC
-static int show_func_example(MYSQL_THD, SHOW_VAR *var, char *buf) {
+static int show_func_honux(MYSQL_THD, SHOW_VAR *var, char *buf) {
   var->type = SHOW_CHAR;
   var->value = buf;  // it's of SHOW_VAR_FUNC_BUFF_SIZE bytes
   snprintf(buf, SHOW_VAR_FUNC_BUFF_SIZE,
@@ -876,7 +876,7 @@ static int show_func_example(MYSQL_THD, SHOW_VAR *var, char *buf) {
   return 0;
 }
 
-struct example_vars_t {
+struct honux_vars_t {
   ulong var1;
   double var2;
   char var3[64];
@@ -885,45 +885,45 @@ struct example_vars_t {
   ulong var6;
 };
 
-example_vars_t example_vars = {100, 20.01, "three hundred", true, false, 8250};
+honux_vars_t honux_vars = {100, 20.01, "three hundred", true, false, 8250};
 
-static SHOW_VAR show_status_example[] = {
-    {"var1", (char *)&example_vars.var1, SHOW_LONG, SHOW_SCOPE_GLOBAL},
-    {"var2", (char *)&example_vars.var2, SHOW_DOUBLE, SHOW_SCOPE_GLOBAL},
+static SHOW_VAR show_status_honux[] = {
+    {"var1", (char *)&honux_vars.var1, SHOW_LONG, SHOW_SCOPE_GLOBAL},
+    {"var2", (char *)&honux_vars.var2, SHOW_DOUBLE, SHOW_SCOPE_GLOBAL},
     {nullptr, nullptr, SHOW_UNDEF,
      SHOW_SCOPE_UNDEF}  // null terminator required
 };
 
-static SHOW_VAR show_array_example[] = {
-    {"array", (char *)show_status_example, SHOW_ARRAY, SHOW_SCOPE_GLOBAL},
-    {"var3", (char *)&example_vars.var3, SHOW_CHAR, SHOW_SCOPE_GLOBAL},
-    {"var4", (char *)&example_vars.var4, SHOW_BOOL, SHOW_SCOPE_GLOBAL},
+static SHOW_VAR show_array_honux[] = {
+    {"array", (char *)show_status_honux, SHOW_ARRAY, SHOW_SCOPE_GLOBAL},
+    {"var3", (char *)&honux_vars.var3, SHOW_CHAR, SHOW_SCOPE_GLOBAL},
+    {"var4", (char *)&honux_vars.var4, SHOW_BOOL, SHOW_SCOPE_GLOBAL},
     {nullptr, nullptr, SHOW_UNDEF, SHOW_SCOPE_UNDEF}};
 
 static SHOW_VAR func_status[] = {
-    {"example_func_example", (char *)show_func_example, SHOW_FUNC,
+    {"honux_func_honux", (char *)show_func_honux, SHOW_FUNC,
      SHOW_SCOPE_GLOBAL},
-    {"example_status_var5", (char *)&example_vars.var5, SHOW_BOOL,
+    {"honux_status_var5", (char *)&honux_vars.var5, SHOW_BOOL,
      SHOW_SCOPE_GLOBAL},
-    {"example_status_var6", (char *)&example_vars.var6, SHOW_LONG,
+    {"honux_status_var6", (char *)&honux_vars.var6, SHOW_LONG,
      SHOW_SCOPE_GLOBAL},
-    {"example_status", (char *)show_array_example, SHOW_ARRAY,
+    {"honux_status", (char *)show_array_honux, SHOW_ARRAY,
      SHOW_SCOPE_GLOBAL},
     {nullptr, nullptr, SHOW_UNDEF, SHOW_SCOPE_UNDEF}};
 
 mysql_declare_plugin(honuxdb){
     MYSQL_STORAGE_ENGINE_PLUGIN,
-    &example_storage_engine,
+    &honux_storage_engine,
     "HonuxDB",
     PLUGIN_AUTHOR_ORACLE,
     "Example storage engine",
     PLUGIN_LICENSE_GPL,
     honuxdb_init,   /* Plugin Init */
     nullptr,             /* Plugin check uninstall */
-    example_deinit_func, /* Plugin Deinit */
+    honux_deinit_func, /* Plugin Deinit */
     0x0001 /* 0.1 */,
     func_status,              /* status variables */
-    example_system_variables, /* system variables */
+    honux_system_variables, /* system variables */
     nullptr,                  /* config options */
     0,                        /* flags */
 } mysql_declare_plugin_end;
