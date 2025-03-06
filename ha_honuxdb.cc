@@ -112,7 +112,7 @@ static bool example_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table);
 
-Honux__share::Honux__share() { thr_lock_init(&lock); }
+Honux_share::Honux_share() { thr_lock_init(&lock); }
 
 static int honuxdb_init(void *p) {
   DBUG_TRACE;
