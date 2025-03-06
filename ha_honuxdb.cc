@@ -108,11 +108,11 @@ static handler *honuxdb_create_handler(handlerton *hton, TABLE_SHARE *table,
 handlerton *honuxdb_hton;
 
 /* Interface to mysqld, to check system tables supported by SE */
-static bool honux_is_supported_system_table(const char *db,
+static bool honuxdb_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table);
 
-Honux_share::Honux_share() { thr_lock_init(&lock); }
+Honuxdb_share::Honuxdb_share() { thr_lock_init(&lock); }
 
 static int honuxdb_init(void *p) {
   DBUG_TRACE;
@@ -128,12 +128,12 @@ static int honuxdb_init(void *p) {
   */
   honuxdb_hton->create = honuxdb_create_handler;
   honuxdb_hton->flags = HTON_CAN_RECREATE;
-  honuxdb_hton->is_supported_system_table = honux_is_supported_system_table;
+  honuxdb_hton->is_supported_system_table = honuxdb_is_supported_system_table;
 
   return 0;
 }
 
-static int honux_deinit_func(void *p [[maybe_unused]]) {
+static int honuxdb_deinit(void *p [[maybe_unused]]) {
   DBUG_TRACE;
 
   assert(p);
@@ -149,14 +149,14 @@ static int honux_deinit_func(void *p [[maybe_unused]]) {
   they are needed to function.
 */
 
-Honux_share *ha_honuxdb::get_share() {
-  Honux_share *tmp_share;
+Honuxdb_share *ha_honuxdb::get_share() {
+  Honuxdb_share *tmp_share;
 
   DBUG_TRACE;
 
   lock_shared_ha_data();
-  if (!(tmp_share = static_cast<Honux_share *>(get_ha_share_ptr()))) {
-    tmp_share = new Honux_share;
+  if (!(tmp_share = static_cast<Honuxdb_share *>(get_ha_share_ptr()))) {
+    tmp_share = new Honuxdb_share;
     if (!tmp_share) goto err;
 
     set_ha_share_ptr(static_cast<Handler_share *>(tmp_share));
@@ -207,7 +207,7 @@ static st_handler_tablename ha_honuxdb_system_tables[] = {
   @retval true   Given db.table_name is supported system table.
   @retval false  Given db.table_name is not a supported system table.
 */
-static bool honux_is_supported_system_table(const char *db,
+static bool honuxdb_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table) {
   st_handler_tablename *systab;
@@ -788,7 +788,7 @@ int ha_honuxdb::create(const char *name, TABLE *, HA_CREATE_INFO *,
   return 0;
 }
 
-struct st_mysql_storage_engine honux_storage_engine = {
+struct st_mysql_storage_engine honuxdb_storage_engine = {
     MYSQL_HANDLERTON_INTERFACE_VERSION};
 
 static ulong srv_enum_var = 0;
@@ -798,10 +798,10 @@ static int srv_signed_int_var = 0;
 static long srv_signed_long_var = 0;
 static longlong srv_signed_longlong_var = 0;
 
-const char *enum_var_names[] = {"e1", "e2", NullS};
+const char *enum_var_names_honux[] = {"e1", "e2", NullS};
 
-TYPELIB enum_var_typelib = {array_elements(enum_var_names) - 1,
-                            "enum_var_typelib", enum_var_names, nullptr};
+TYPELIB enum_var_typelib_honux = {array_elements(enum_var_names_honux) - 1,
+                            "enum_var_typelib_honux", enum_var_names_honux, nullptr};
 
 static MYSQL_SYSVAR_ENUM(enum_var,                        // name
                          srv_enum_var,                    // varname
@@ -810,7 +810,7 @@ static MYSQL_SYSVAR_ENUM(enum_var,                        // name
                          nullptr,                         // check
                          nullptr,                         // update
                          0,                               // def
-                         &enum_var_typelib);              // typelib
+                         &enum_var_typelib_honux);              // typelib
 
 static MYSQL_SYSVAR_ULONG(ulong_var, srv_ulong_var, PLUGIN_VAR_RQCMDARG,
                           "0..1000", nullptr, nullptr, 8, 0, 1000, 0);
@@ -911,17 +911,20 @@ static SHOW_VAR func_status[] = {
      SHOW_SCOPE_GLOBAL},
     {nullptr, nullptr, SHOW_UNDEF, SHOW_SCOPE_UNDEF}};
 
+/*
+  Plugin description
+*/
 mysql_declare_plugin(honuxdb){
-    MYSQL_STORAGE_ENGINE_PLUGIN,
-    &honux_storage_engine,
-    "HonuxDB",
-    PLUGIN_AUTHOR_ORACLE,
-    "Example storage engine",
-    PLUGIN_LICENSE_GPL,
-    honuxdb_init,   /* Plugin Init */
-    nullptr,             /* Plugin check uninstall */
-    honux_deinit_func, /* Plugin Deinit */
-    0x0001 /* 0.1 */,
+    MYSQL_STORAGE_ENGINE_PLUGIN,  /* the plugin type (a MYSQL_XXX_PLUGIN value) */
+    &honuxdb_storage_engine,      /* pointer to type-specific plugin descriptor */
+    "HonuxDB",                    /* plugin name */
+    "Gyeongsu Choi",              /* plugin author */
+    "Example storage engine",     /* general descriptive text */
+    PLUGIN_LICENSE_GPL,           /* the plugin license (PLUGIN_LICENSE_XXX) */
+    honuxdb_init,                 /* plugin init */
+    nullptr,                      /* plugin check uninstall */
+    honuxdb_deinit,               /* plugin deinit */
+    0x0001                        /* plugin version (0.1) */,
     func_status,              /* status variables */
     honux_system_variables, /* system variables */
     nullptr,                  /* config options */

@@ -51,11 +51,11 @@
   Example_share is a class that will be shared among all open handlers.
   This example implements the minimum of what you will probably need.
 */
-class Honux_share : public Handler_share {
+class Honuxdb_share : public Handler_share {
  public:
   THR_LOCK lock;
-  Honux_share();
-  ~Honux_share() override { thr_lock_delete(&lock); }
+  Honuxdb_share();
+  ~Honuxdb_share() override { thr_lock_delete(&lock); }
 };
 
 /** @brief
@@ -63,8 +63,8 @@ class Honux_share : public Handler_share {
 */
 class ha_honuxdb : public handler {
   THR_LOCK_DATA lock;          ///< MySQL lock
-  Honux_share *share;        ///< Shared lock info
-  Honux_share *get_share();  ///< Get the share
+  Honuxdb_share *share;        ///< Shared lock info
+  Honuxdb_share *get_share();  ///< Get the share
 
  public:
   ha_honuxdb(handlerton *hton, TABLE_SHARE *table_arg);
