@@ -112,7 +112,7 @@ static bool example_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table);
 
-Example_share::Example_share() { thr_lock_init(&lock); }
+Honux__share::Honux__share() { thr_lock_init(&lock); }
 
 static int honuxdb_init(void *p) {
   DBUG_TRACE;
@@ -149,14 +149,14 @@ static int example_deinit_func(void *p [[maybe_unused]]) {
   they are needed to function.
 */
 
-Example_share *ha_honuxdb::get_share() {
-  Example_share *tmp_share;
+Honux_share *ha_honuxdb::get_share() {
+  Honux_share *tmp_share;
 
   DBUG_TRACE;
 
   lock_shared_ha_data();
-  if (!(tmp_share = static_cast<Example_share *>(get_ha_share_ptr()))) {
-    tmp_share = new Example_share;
+  if (!(tmp_share = static_cast<Honux_share *>(get_ha_share_ptr()))) {
+    tmp_share = new Honux_share;
     if (!tmp_share) goto err;
 
     set_ha_share_ptr(static_cast<Handler_share *>(tmp_share));
